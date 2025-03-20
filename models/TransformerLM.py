@@ -10,10 +10,10 @@ class PositionalEncoding(nn.Module):
         self.d_model = d_model
 
     def forward(self, x):
-        j = torch.arange(0, self.d_model, 2).float()
+        j = torch.arange(0, self.d_model, 2).float().to(x.device)
         f = torch.exp(-(math.log(10000)) * j/self.d_model)
-        t = torch.arange(0, x.shape[1], 1).float().unsqueeze(1)
-        pe = torch.zeros(x.shape[1], self.d_model)
+        t = torch.arange(0, x.shape[1], 1).float().unsqueeze(1).to(x.device)
+        pe = torch.zeros(x.shape[1], self.d_model).to(x.device)
         pe[:, 0::2] = torch.sin(t * f)
         pe[:, 1::2] = torch.cos(t * f)
         pe = pe.unsqueeze(0)

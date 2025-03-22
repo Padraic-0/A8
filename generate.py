@@ -70,20 +70,24 @@ def main():
 
 
 def argmaxDecode(scores):
-   return torch.argmax(scores, dim=0)
+   return torch.argmax(scores, dim=1)
 
 def sampleDecode(scores, temp = 0.5):
-   probs = nn.functional.softmax(scores/temp, dim=0)
+   probs = nn.functional.softmax(scores/temp, dim=1)
    return Categorical(probs).sample()
 
 def nucleusDecode(scores, p=0.9, temp = 0.5):
-   probs = nn.functional.softmax(scores/temp, dim=0)
-   sorted_probs, sorted_indices = torch.sort(probs, descending=True)
-   cumulative_probs = torch.cumsum(sorted_probs, dim=0)
-   k = torch.searchsorted(cumulative_probs, p).item()
+   probs = nn.functional.softmax(scores/temp, dim=1)
+   sorted_probs, sorted_indices = torch.sort(probs, descending=True, dim=1)
+   cumulative_probs = torch.cumsum(sorted_probs, dim=1)
+   k = torch.sum(cumulative_probs < p, dim=1)
    new_probs = torch.zeros_like(probs)
-   new_probs[sorted_indices[:k+1]] = probs[sorted_indices[:k+1]]
-   new_probs /= new_probs.sum()
+   for i in range(probs.size(0)):
+      batch_k = sorted_indices[i,:k[i]+1]
+      new_probs[i,batch_k] = probs[i,batch_k]
+   
+  
+   new_probs /= new_probs.sum(dim=1, keepdim=True)
    return Categorical(new_probs).sample()
    
 

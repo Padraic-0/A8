@@ -17,7 +17,7 @@ else:
 MAX_LENGTH = 500
 
 def main():
-   CHKPT_PATH = "./chkpts/2ZJPbu_TinyStories"
+   CHKPT_PATH = "./chkpts/GHylu1_TinyStories"
    chkpt = torch.load(CHKPT_PATH, weights_only=False)
    config = chkpt['config']
 
